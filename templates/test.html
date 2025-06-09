@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceType Assistant</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #0d0d0d 30%, #1a1a1d 70%);
+            color: #e6e6e6;
+            overflow: hidden;
+        }
+
+        /* Header */
+        h1 {
+            color: #0db39e;
+            font-size: 3rem;
+            text-shadow: 0 0 10px #0db39e, 0 0 20px #0db39e;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        /* Chat container styling */
+       /* Chat container styling with card effect */
+/* Chat container styling with card effect */
+#chat-container {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #282c34;
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid #0db39e;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Gradient and blur effect for chat container */
+#chat-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    left: -10px;
+    margin: auto;
+    width: 420px;
+    height: 440px;
+    border-radius: 25px;
+    background: linear-gradient(-45deg, #e81cff 0%, #40c9ff 100%);
+    z-index: -10;
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#chat-container::after {
+    content: "";
+    z-index: -1;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(-45deg, #fc00ff 0%, #00dbde 100%);
+    transform: translate3d(0, 0, 0) scale(0.95);
+    filter: blur(30px);
+}
+
+/* Hover effect for chat container */
+#chat-container:hover::after {
+    filter: blur(40px);
+}
+
+#chat-container:hover::before {
+    transform: rotate(-45deg) scaleX(1.05) scaleY(1.05); /* Slightly larger rotation to match container size */
+}
+
+
+        /* Robot face container */
+        #robot-face {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        /* Robot eyes */
+        .eye-container {
+  position: relative;
+  width: 108px; /* Same width as .loader to contain both eyes */
+  display: flex;
+  justify-content: space-between;
+}
+
+.eye {
+  width: 48px;
+  height: 48px;
+  background-color: #fff; /* Background color for the eye */
+  background-image: radial-gradient(circle 14px, #0d161b 100%, transparent 0);
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  animation: eyeMove 10s infinite, blink 10s infinite;
+}
+
+/* Keyframes for eye movement and blinking */
+@keyframes eyeMove {
+  0%, 10% {
+    background-position: 0px 0px;
+  }
+  13%, 40% {
+    background-position: -15px 0px;
+  }
+  43%, 70% {
+    background-position: 15px 0px;
+  }
+  73%, 90% {
+    background-position: 0px 15px;
+  }
+  93%, 100% {
+    background-position: 0px 0px;
+  }
+}
+
+@keyframes blink {
+  0%, 10%, 12%, 20%, 22%, 40%, 42%, 60%, 62%, 70%, 72%, 90%, 92%, 98%, 100% {
+    height: 48px;
+  }
+  11%, 21%, 41%, 61%, 71%, 91%, 99% {
+    height: 18px;
+  }
+}
+
+
+        /* Robot mouth */
+        #mouth {
+            width: 140px;
+            height: 25px;
+            background-color: #e6e6e6;
+            border-radius: 12px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+
+        /* User input styling */
+        #user_input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 30px;
+            border: 2px solid #444;
+            outline: none;
+            background-color: #3c4043;
+            color: #e6e6e6;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        #user_input:focus {
+            border-color: #0db39e;
+        }
+
+        /* Button styling */
+        
+        button, #mic-button {
+  margin-top: 25px;
+  padding: 15px 40px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 30px;
+  border: 1px solid #ffffff80; /* Updated border style */
+  background-color: transparent; /* Updated background color */
+  color: #ffffff80; /* Updated text color */
+  text-shadow: none; /* Added text-shadow property */
+  transition: background-color 0.3s ease, transform 0.3s ease, border 0.5s ease, color 0.5s ease, box-shadow 0.5s ease; /* Updated transition */
+  box-shadow: transparent; /* Updated box-shadow property */
+  text-transform: uppercase; /* Added text-transform property */
+  font-weight: 500; /* Added font-weight property */
+  user-select: none; /* Added user-select property */
+}
+
+button:hover, #mic-button:hover, button:focus, #mic-button:focus {
+  color: #ffffff;
+  background-color: #008cff; /* Updated background color on hover/focus */
+  border: 1px solid #008cff; /* Updated border color on hover/focus */
+  text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 0 0 20px #ffffff; /* Added text-shadow on hover/focus */
+  box-shadow: 0 0 5px #008cff, 0 0 20px #008cff, 0 0 50px #008cff, 0 0 100px #008cff; /* Added box-shadow on hover/focus */
+}
+
+button:active, #mic-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Updated box-shadow on active */
+  background-color: #0b7a6b; /* Optional: you can adjust the background color if needed on active */
+}
+
+
+        /* Bot response styling */
+        #bot_response {
+            margin-top: 25px;
+            width: 100%;
+            padding: 25px;
+            border: 1px solid #666;
+            border-radius: 15px;
+            background-color: #35373b;
+            min-height: 90px;
+            color: #e6e6e6;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease;
+            font-size: 1rem;
+        }
+
+        #bot_response:empty {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+    </style>
+    <script>
+        // Function to get response from the server
+        async function getResponse(userInput) {
+            try {
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_input=${encodeURIComponent(userInput)}`
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('bot_response').innerText = data.response;
+                speak(data.response);
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('bot_response').innerText = "Sorry, I couldn't process your request.";
+            }
+        }
+
+        // Function to speak the response
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        // Function to handle text input
+        function handleTextInput() {
+            const userInput = document.getElementById('user_input').value;
+            getResponse(userInput);
+        }
+
+        // Function to handle voice input
+        function startVoiceRecognition() {
+            const recognition = new webkitSpeechRecognition() || SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const userInput = event.results[0][0].transcript;
+                document.getElementById('user_input').value = userInput;
+                getResponse(userInput);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                document.getElementById('bot_response').innerText = "Sorry, I couldn't understand your voice.";
+            };
+        }
+    </script>
+</head>
+<body>
+    <h1>VoiceType Assistant</h1>
+    <div id="chat-container">
+        <div id="robot-face">
+            <div style="display: flex;">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+            <div id="mouth"></div>
+        </div>
+        <input type="text" id="user_input" placeholder="Type your message here...">
+        <button onclick="handleTextInput()">Send</button>
+        <button id="mic-button" onclick="startVoiceRecognition()">🎤 Speak</button>
+        <p id="bot_response"></p>
+    </div>
+</body>
+</html>

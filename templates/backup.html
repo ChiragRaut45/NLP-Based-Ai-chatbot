@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceType Assistant</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #0d0d0d;
+            color: #e6e6e6;
+            overflow: hidden;
+        }
+
+        /* Header */
+        h1 {
+            color: #0db39e;
+            font-size: 2.5rem;
+            text-shadow: 0 0 5px #0db39e, 0 0 10px #0db39e, 0 0 20px #0db39e;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Chat container styling */
+        #chat-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #333;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 2px solid #0db39e;
+            position: relative;
+        }
+
+        /* Robot face container */
+        #robot-face {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Robot eyes */
+        .eye {
+            width: 40px;
+            height: 40px;
+            background-color: #0db39e;
+            border-radius: 50%;
+            margin: 10px;
+            box-shadow: 0 0 10px #0db39e, 0 0 20px #0db39e;
+        }
+
+        /* Robot mouth */
+        #mouth {
+            width: 120px;
+            height: 20px;
+            background-color: #e6e6e6;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-top: 15px;
+        }
+
+        /* User input styling */
+        #user_input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 30px;
+            border: 2px solid #444;
+            outline: none;
+            background-color: #555;
+            color: #e6e6e6;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s ease;
+            margin-top: 15px;
+        }
+
+        #user_input:focus {
+            border-color: #0db39e;
+        }
+
+        /* Button styling */
+        button, #mic-button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 30px;
+            border: none;
+            background-color: #0db39e;
+            color: #fff;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover, #mic-button:hover {
+            background-color: #0b7a6b;
+            transform: translateY(-2px);
+        }
+
+        button:active, #mic-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Bot response styling */
+        #bot_response {
+            margin-top: 20px;
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #666;
+            border-radius: 10px;
+            background-color: #2a2a2e;
+            min-height: 80px;
+            color: #e6e6e6;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease;
+        }
+
+        #bot_response:empty {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+    </style>
+    <script>
+        // Function to get response from the server
+        async function getResponse(userInput) {
+            try {
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_input=${encodeURIComponent(userInput)}`
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('bot_response').innerText = data.response;
+                speak(data.response);
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('bot_response').innerText = "Sorry, I couldn't process your request.";
+            }
+        }
+
+        // Function to speak the response
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        // Function to handle text input
+        function handleTextInput() {
+            const userInput = document.getElementById('user_input').value;
+            getResponse(userInput);
+        }
+
+        // Function to handle voice input
+        function startVoiceRecognition() {
+            const recognition = new webkitSpeechRecognition() || SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const userInput = event.results[0][0].transcript;
+                document.getElementById('user_input').value = userInput;
+                getResponse(userInput);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                document.getElementById('bot_response').innerText = "Sorry, I couldn't understand your voice.";
+            };
+        }
+    </script>
+</head>
+<body>
+    <h1>VoiceType Assistant</h1>
+    <div id="chat-container">
+        <div id="robot-face">
+            <div style="display: flex;">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+            <div id="mouth"></div>
+        </div>
+        <input type="text" id="user_input" placeholder="Type your message here...">
+        <button onclick="handleTextInput()">Send</button>
+        <button id="mic-button" onclick="startVoiceRecognition()">🎤 Speak</button>
+        <p id="bot_response"></p>
+    </div>
+</body>
+</html>
